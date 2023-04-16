@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.entrypoints.apis.routers import root_router
+
 app = FastAPI()
 
 origins = [
@@ -17,3 +19,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(root_router.router)
