@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  postgres:
+    container_name: 'sih_pg'
+    image: postgres:latest
+    env_file: ".env"
+    volumes:
+      - .:/var/lib/postgresql/data
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
