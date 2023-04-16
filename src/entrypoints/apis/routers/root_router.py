@@ -12,5 +12,5 @@ router = APIRouter(
 
 @router.post('/user')
 async def add_user(user: models.User) -> Response:
-    """Create new user"""
+    """Create new user in DB"""
     ...
