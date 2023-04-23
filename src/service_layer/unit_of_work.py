@@ -6,15 +6,16 @@ from sqlalchemy.ext.asyncio import (
 
 from config import config
 
-engine = create_async_engine(
-        url=config.DB_URL,
-        isolation_level='REPEATABLE READ'
+
+def default_session_maker():
+    engine = create_async_engine(
+            url=config.DB_URL,
+            isolation_level='REPEATABLE READ'
+        )
+    return async_sessionmaker(
+        bind=engine
     )
 
-DEFAULT_SESSION = async_sessionmaker(
-    bind=engine
-)
-
-async def get_session() -> AsyncSession:
-    db = DEFAULT_SESSION()
-    return db
+def get_session() -> AsyncSession:
+    session_maker = default_session_maker()
+    return session_maker()

@@ -1,3 +1,4 @@
+import os
 from typing import Annotated
 
 from fastapi import FastAPI, Depends
@@ -6,10 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.schema import CreateTable
 
-from src.service_layer.unit_of_work import get_session, engine
+from src.service_layer.unit_of_work import get_session
 from src.entrypoints.apis.routers import root_router
 from src.domain import models
 from src.service_layer import unit_of_work
+from config import config
 
 app = FastAPI()
 
@@ -31,7 +33,11 @@ app.add_middleware(
 
 @app.on_event('startup')
 async def on_start():
-    session = await get_session()
+    if config.user is None:
+        print('тестовое окружение')
+        return
+
+    session = get_session()
 
     async with session:
 

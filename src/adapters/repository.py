@@ -23,17 +23,17 @@ class DBRepo:
     def add_user(self, new_user: User):
         self.session.add(new_user)
 
-    async def del_user(self, user: str):
+    async def del_user(self, user_id: str):
         await self.session.execute(
             delete(User).where(
-                User.user_id == user
+                User.user_id == user_id
             )
         )
 
-    async def get_user(self, user: str) -> User | None:
+    async def get_user(self, user_id: str) -> User | None:
         data = await self.session.execute(
             select(User).where(
-                User.user_id == user
+                User.user_id == user_id
             )
         )
 
