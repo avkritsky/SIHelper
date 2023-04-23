@@ -1,10 +1,17 @@
+from datetime import datetime
+
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass, Mapped
 from sqlalchemy.orm import mapped_column
 from pydantic import BaseModel
 
 
 class Base(MappedAsDataclass, DeclarativeBase):
-    ...
+    @property
+    def output(self):
+        return {key: val
+                for key, val in self.__dict__.items()
+                if not key.startswith('_')}
+
 
 class User(Base):
     __tablename__ = 'users'
@@ -14,11 +21,23 @@ class User(Base):
     chat_id: Mapped[str]
     fullname: Mapped[str]
 
-    @property
-    def output(self):
-        return {key: val
-                for key, val in self.__dict__.items()
-                if not key.startswith('_')}
+# alembic или пересоздать базу транзакций
+class Transaction(Base):
+    __tablename__ = 'transactions'
+
+    id: Mapped[int] = mapped_column(primary_key=True, init=False)
+    user_id: Mapped[str]
+    target_currency: Mapped[str]
+    target_value: Mapped[str]
+    from_currency: Mapped[str]
+    from_value: Mapped[str]
+    timestamp: Mapped[datetime]
+
+
+all_tables = (
+    User,
+    Transaction,
+)
 
 
 class ValidateUser(BaseModel):
