@@ -55,7 +55,7 @@ async def dek_user(
 
 
 @router.get('/users')
-async def get_user(
+async def get_users(
         session: Annotated[
             AsyncSession,
             Depends(get_session)
@@ -64,6 +64,25 @@ async def get_user(
     """Delete user in DB"""
     async with repository.DBRepo(session=session) as repo:
         data = await repo.list(models.User)
+
+    return Response(
+        status_code=200,
+        content=json.dumps(
+        {'data': data})
+    )
+
+
+@router.get('/user')
+async def get_user(
+        user_id: str,
+        session: Annotated[
+            AsyncSession,
+            Depends(get_session)
+        ],
+) -> Response:
+    """Delete user in DB"""
+    async with repository.DBRepo(session=session) as repo:
+        data = await repo.get_user(user_id)
 
     return Response(
         status_code=200,

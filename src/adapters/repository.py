@@ -30,14 +30,19 @@ class DBRepo:
             )
         )
 
-    async def get_user(self, user: User) -> User | None:
+    async def get_user(self, user: str) -> User | None:
         data = await self.session.execute(
             select(User).where(
-                User.user_id == user.user_id
+                User.user_id == user
             )
         )
 
-        return data.first()
+        data = data.first()
+
+        if data is not None:
+            data = data[0].output
+
+        return data
 
     async def list(self, list_object):
         data = await self.session.execute(
