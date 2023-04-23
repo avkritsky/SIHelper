@@ -40,13 +40,13 @@ async def on_start():
     session = get_session()
 
     async with session:
+        for table in models.all_tables:
+            create_expression = CreateTable(
+                table.__table__,
+                if_not_exists=True
+            )
 
-        create_expression = CreateTable(
-            models.User.__table__,
-            if_not_exists=True
-        )
-
-        await session.execute(create_expression)
+            await session.execute(create_expression)
         await session.commit()
 
 
