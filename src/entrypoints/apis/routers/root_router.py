@@ -43,11 +43,9 @@ async def dek_user(
         ]
 ) -> Response:
     """Delete user in DB"""
-    repo = repository.DBRepo(session=session)
-
-    await repo.del_user(user)
-
-    await repo.session.commit()
+    async with repository.DBRepo(session=session) as repo:
+        await repo.del_user(user)
+        await repo.session.commit()
 
     return Response(
         status_code=200,
@@ -57,7 +55,7 @@ async def dek_user(
 
 
 @router.get('/users')
-async def dek_user(
+async def get_user(
         session: Annotated[
             AsyncSession,
             Depends(get_session)

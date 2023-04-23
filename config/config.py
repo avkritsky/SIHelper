@@ -7,5 +7,3 @@ password = os.environ.get('POSTGRES_PASSWORD').replace('\r', '')
 db_name = os.environ.get('POSTGRES_DB').replace('\r', '')
 
 DB_URL = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db_name}"
-
-print(f'DB_URL: {DB_URL}\n\t{user=}\n\t{password=}')
