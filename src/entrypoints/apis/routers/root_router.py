@@ -23,11 +23,9 @@ async def add_user(
         ]
 ) -> Response:
     """Create new user in DB"""
-    repo = repository.DBRepo(session=session)
-
-    repo.add_user(models.User(**user.__dict__))
-
-    await repo.session.commit()
+    async with repository.DBRepo(session=session) as repo:
+        repo.add_user(models.User(**user.__dict__))
+        await repo.session.commit()
 
     return Response(
         status_code=200,
@@ -66,9 +64,8 @@ async def dek_user(
         ],
 ) -> Response:
     """Delete user in DB"""
-    repo = repository.DBRepo(session=session)
-
-    data = await repo.list(models.User)
+    async with repository.DBRepo(session=session) as repo:
+        data = await repo.list(models.User)
 
     return Response(
         status_code=200,

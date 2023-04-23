@@ -12,6 +12,14 @@ class DBRepo:
         self.session = session
 
 
+    async def __aenter__(self):
+        return self
+
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.session.close()
+
+
     def add_user(self, new_user: User):
         self.session.add(new_user)
 
@@ -36,16 +44,8 @@ class DBRepo:
             select(list_object)
         )
 
-        # for row_item in data:
-        #     item = row_item
-
         res = []
         while (item := data.fetchone()) is not None:
             res.append(item[0].output)
-
-        # data = data.fetchmany()
-        # print(data)
-        #
-        # data = [item._asdict() for item in data]
 
         return res

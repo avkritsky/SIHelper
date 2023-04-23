@@ -16,8 +16,5 @@ DEFAULT_SESSION = async_sessionmaker(
 )
 
 async def get_session() -> AsyncSession:
-    try:
-        db = DEFAULT_SESSION()
-        return db
-    except Exception as e:
-        raise e
+    db = DEFAULT_SESSION()
+    return db
