@@ -1,7 +1,14 @@
 from datetime import datetime
+from typing import List
 
-from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass, Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    MappedAsDataclass,
+    Mapped,
+    relationship,
+    mapped_column,
+)
 from pydantic import BaseModel
 
 
@@ -17,16 +24,26 @@ class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
-    user_id: Mapped[str]
+    user_id: Mapped[str] = mapped_column(unique=True)
     chat_id: Mapped[str]
     fullname: Mapped[str]
+    settings: Mapped['Settings'] = relationship(init=False)
+    transactions: Mapped[List['Transaction']] = relationship(init=False)
+
+
+class Settings(Base):
+    __tablename__ = 'settings'
+
+    id: Mapped[int] = mapped_column(primary_key=True, init=False)
+    user_id: Mapped[str] = mapped_column(ForeignKey('users.id'))
+    auto_statistic: Mapped[bool]
 
 # alembic или пересоздать базу транзакций
 class Transaction(Base):
     __tablename__ = 'transactions'
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
-    user_id: Mapped[str]
+    user_id: Mapped[str] = mapped_column(ForeignKey('users.id'))
     target_currency: Mapped[str]
     target_value: Mapped[str]
     from_currency: Mapped[str]
@@ -37,6 +54,7 @@ class Transaction(Base):
 all_tables = (
     User,
     Transaction,
+    Settings,
 )
 
 

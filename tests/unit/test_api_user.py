@@ -2,6 +2,7 @@ import json
 
 import pytest
 from sqlalchemy import select
+from sqlalchemy.engine.result import ChunkedIteratorResult, Row
 
 from src.domain.models import User
 
@@ -31,18 +32,15 @@ async def test_post_user(client_test, create_db):
     await create_db(session)
 
     user = User(user_id='0001', chat_id='0001', fullname='avkritksy')
+    user.id = 1
 
     client.post('/user', data=json.dumps(user.output))
 
-    user.id = 1
+    data = client.get('/user?user_id=0001')
 
-    data = await session.execute(
-        select(User).where(
-            User.user_id == user.user_id
-        )
-    )
+    data = data.json().get('data')
 
-    assert data.fetchone()[0] == user
+    assert data == user.output
 
     await session.close()
 
@@ -55,19 +53,17 @@ async def test_del_user(client_test, create_db):
 
     user = User(user_id='0001', chat_id='0001', fullname='avkritksy')
 
-    session.add(user)
+    client.post('/user', data=json.dumps(user.output))
 
-    data = client.delete('/user?user_id=0001')
+    data = client.delete(f'/user?user_id={user.user_id}')
 
     assert data.status_code == 200
 
-    data = await session.execute(
-        select(User).where(
-            User.user_id == user.user_id
-        )
-    )
+    data = client.get(f'/user?user_id={user.user_id}')
 
-    assert data.fetchone() is None
+    data = data.json().get('data')
+
+    assert data is None
 
     await session.close()
 

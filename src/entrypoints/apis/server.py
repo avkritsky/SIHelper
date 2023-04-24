@@ -47,7 +47,7 @@ async def on_start():
             )
 
             await session.execute(create_expression)
-        await session.commit()
+            await session.commit()
 
 
 app.include_router(root_router.router)
