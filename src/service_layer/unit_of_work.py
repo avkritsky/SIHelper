@@ -10,10 +10,12 @@ from config import config
 def default_session_maker():
     engine = create_async_engine(
             url=config.DB_URL,
+            # echo=True,
             isolation_level='REPEATABLE READ'
         )
     return async_sessionmaker(
-        bind=engine
+        bind=engine,
+        expire_on_commit=False
     )
 
 def get_session() -> AsyncSession:

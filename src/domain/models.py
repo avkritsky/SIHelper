@@ -15,9 +15,19 @@ from pydantic import BaseModel
 class Base(MappedAsDataclass, DeclarativeBase):
     @property
     def output(self):
-        return {key: val
-                for key, val in self.__dict__.items()
-                if not key.startswith('_')}
+        output = {}
+
+        for key, val in self.__dict__.items():
+            if key.startswith('_'):
+                continue
+
+            match val:
+                case int() | str():
+                    output[key] = val
+                case datetime():
+                    output[key] = val.isoformat()
+
+        return output
 
 
 class User(Base):
@@ -38,7 +48,7 @@ class Settings(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     auto_statistic: Mapped[bool]
 
-# alembic или пересоздать базу транзакций
+
 class Transaction(Base):
     __tablename__ = 'transactions'
 

@@ -66,13 +66,13 @@ async def get_user(
 ) -> Response:
     """Delete user in DB"""
     async with repository.DBRepo(session=session) as repo:
-        data = await repo.get_user(tg_id)
+        user = await repo.get_user(tg_id)
 
     return Response(
         status_code=200,
         media_type='application/json',
         content=json.dumps(
-        {'data': data})
+        {'data': user.output})
     )
 
 

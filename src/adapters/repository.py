@@ -41,12 +41,14 @@ class DBRepo:
             )
         )
 
-        data = data.first()
+        user = data.scalars().first()
 
-        if data is not None:
-            data = data[0].output
+        await self.session.refresh(user, attribute_names=[
+            'transactions',
+            'settings',
+        ])
 
-        return data
+        return user
 
     async def list(self, list_object):
         data = await self.session.execute(

@@ -15,6 +15,27 @@ router = APIRouter(
 )
 
 
+@router.get('/')
+async def get_user_transactions(
+        tg_id: str,
+        session: Annotated[
+            AsyncSession,
+            Depends(get_session)
+        ],
+) -> Response:
+    """Delete user in DB"""
+    async with repository.DBRepo(session=session) as repo:
+        user = await repo.get_user(tg_id)
+        print(user.transactions[0].__dict__)
+
+    return Response(
+        status_code=200,
+        media_type='application/json',
+        content=json.dumps(
+        {'data': [transaction.output for transaction in user.transactions]})
+    )
+
+
 @router.post('/')
 async def add_transaction(
         transaction: models.ValidateTransaction,
@@ -29,7 +50,7 @@ async def add_transaction(
 
         repo.add(
             models.Transaction(
-                user_id=user.get('id'),
+                user_id=user.id,
                 target_currency=transaction.target_currency,
                 target_value=transaction.target_value,
                 from_currency=transaction.from_currency,
