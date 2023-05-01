@@ -24,7 +24,7 @@ class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
-    user_id: Mapped[str] = mapped_column(unique=True)
+    tg_id: Mapped[str] = mapped_column(unique=True)
     chat_id: Mapped[str]
     fullname: Mapped[str]
     settings: Mapped['Settings'] = relationship(init=False)
@@ -35,7 +35,7 @@ class Settings(Base):
     __tablename__ = 'settings'
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
-    user_id: Mapped[str] = mapped_column(ForeignKey('users.id'))
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     auto_statistic: Mapped[bool]
 
 # alembic или пересоздать базу транзакций
@@ -43,7 +43,7 @@ class Transaction(Base):
     __tablename__ = 'transactions'
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
-    user_id: Mapped[str] = mapped_column(ForeignKey('users.id'))
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     target_currency: Mapped[str]
     target_value: Mapped[str]
     from_currency: Mapped[str]
@@ -59,6 +59,14 @@ all_tables = (
 
 
 class ValidateUser(BaseModel):
-    user_id: str
+    tg_id: str
     chat_id: str
     fullname: str
+
+
+class ValidateTransaction(BaseModel):
+    tg_id: str
+    target_currency: str
+    target_value: str
+    from_currency: str
+    from_value: str

@@ -9,12 +9,12 @@ from src.adapters import repository
 from src.service_layer.unit_of_work import get_session
 
 router = APIRouter(
-    prefix='',
+    prefix='/user',
     responses={404: {'data': 'Not found'}}
 )
 
 
-@router.post('/user')
+@router.post('/')
 async def add_user(
         user: models.ValidateUser,
         session: Annotated[
@@ -24,19 +24,20 @@ async def add_user(
 ) -> Response:
     """Create new user in DB"""
     async with repository.DBRepo(session=session) as repo:
-        repo.add_user(models.User(**user.__dict__))
+        repo.add(models.User(**user.__dict__))
         await repo.session.commit()
 
     return Response(
         status_code=200,
+        media_type='application/json',
         content=json.dumps(
         {'data': f'Add user {user.fullname}'})
     )
 
 
-@router.delete('/user')
+@router.delete('/')
 async def del_user(
-        user_id: str,
+        tg_id: str,
         session: Annotated[
             AsyncSession,
             Depends(get_session)
@@ -44,17 +45,38 @@ async def del_user(
 ) -> Response:
     """Delete user in DB"""
     async with repository.DBRepo(session=session) as repo:
-        await repo.del_user(user_id)
+        await repo.del_user(tg_id)
         await repo.session.commit()
 
     return Response(
         status_code=200,
+        media_type='application/json',
         content=json.dumps(
-        {'data': f'Del user #{user_id}'})
+        {'data': f'Del user #{tg_id}'})
     )
 
 
-@router.get('/users')
+@router.get('/')
+async def get_user(
+        tg_id: str,
+        session: Annotated[
+            AsyncSession,
+            Depends(get_session)
+        ],
+) -> Response:
+    """Delete user in DB"""
+    async with repository.DBRepo(session=session) as repo:
+        data = await repo.get_user(tg_id)
+
+    return Response(
+        status_code=200,
+        media_type='application/json',
+        content=json.dumps(
+        {'data': data})
+    )
+
+
+@router.get('/all')
 async def get_users(
         session: Annotated[
             AsyncSession,
@@ -67,25 +89,7 @@ async def get_users(
 
     return Response(
         status_code=200,
-        content=json.dumps(
-        {'data': data})
-    )
-
-
-@router.get('/user')
-async def get_user(
-        user_id: str,
-        session: Annotated[
-            AsyncSession,
-            Depends(get_session)
-        ],
-) -> Response:
-    """Delete user in DB"""
-    async with repository.DBRepo(session=session) as repo:
-        data = await repo.get_user(user_id)
-
-    return Response(
-        status_code=200,
+        media_type='application/json',
         content=json.dumps(
         {'data': data})
     )

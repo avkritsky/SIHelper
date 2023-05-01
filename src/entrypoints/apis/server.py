@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.schema import CreateTable
 
 from src.service_layer.unit_of_work import get_session
-from src.entrypoints.apis.routers import root_router
+from src.entrypoints.apis.routers import root_router, transactions_router
 from src.domain import models
 from src.service_layer import unit_of_work
 from config import config
@@ -51,3 +51,4 @@ async def on_start():
 
 
 app.include_router(root_router.router)
+app.include_router(transactions_router.router)

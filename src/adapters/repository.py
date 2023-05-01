@@ -1,7 +1,7 @@
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.domain.models import User
+from src.domain.models import User, Base
 
 class DBRepo:
 
@@ -20,20 +20,24 @@ class DBRepo:
         await self.session.close()
 
 
+    def add(self, item: Base):
+        self.session.add(item)
+
+
     def add_user(self, new_user: User):
         self.session.add(new_user)
 
-    async def del_user(self, user_id: str):
+    async def del_user(self, tg_id: str):
         await self.session.execute(
             delete(User).where(
-                User.user_id == user_id
+                User.tg_id == tg_id
             )
         )
 
-    async def get_user(self, user_id: str) -> User | None:
+    async def get_user(self, tg_id: str) -> User | None:
         data = await self.session.execute(
             select(User).where(
-                User.user_id == user_id
+                User.tg_id == tg_id
             )
         )
 

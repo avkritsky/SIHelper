@@ -13,7 +13,7 @@ async def test_get_user(client_test, create_db):
 
     await create_db(session)
 
-    user = User(user_id='0001', chat_id='0001', fullname='avkritksy')
+    user = User(tg_id='0001', chat_id='0001', fullname='avkritksy')
 
     session.add(user)
 
@@ -31,7 +31,7 @@ async def test_post_user(client_test, create_db):
 
     await create_db(session)
 
-    user = User(user_id='0001', chat_id='0001', fullname='avkritksy')
+    user = User(tg_id='0001', chat_id='0001', fullname='avkritksy')
     user.id = 1
 
     client.post('/user', data=json.dumps(user.output))
@@ -51,15 +51,15 @@ async def test_del_user(client_test, create_db):
 
     await create_db(session)
 
-    user = User(user_id='0001', chat_id='0001', fullname='avkritksy')
+    user = User(tg_id='0001', chat_id='0001', fullname='avkritksy')
 
     client.post('/user', data=json.dumps(user.output))
 
-    data = client.delete(f'/user?user_id={user.user_id}')
+    data = client.delete(f'/user?user_id={user.tg_id}')
 
     assert data.status_code == 200
 
-    data = client.get(f'/user?user_id={user.user_id}')
+    data = client.get(f'/user?user_id={user.tg_id}')
 
     data = data.json().get('data')
 
@@ -74,11 +74,11 @@ async def test_get_all_users(client_test, create_db):
 
     await create_db(session)
 
-    user = User(user_id='0001', chat_id='0001', fullname='avkritksy')
+    user = User(tg_id='0001', chat_id='0001', fullname='avkritksy')
 
     session.add(user)
 
-    data = client.get('/users')
+    data = client.get('/user/all')
 
     assert data.status_code == 200
     assert data.json().get('data') == [user.output]
