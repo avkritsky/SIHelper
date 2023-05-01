@@ -1,8 +1,8 @@
 import json
-from typing import Annotated, Coroutine
+from typing import Annotated
 
 from fastapi import APIRouter, Response, Depends
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain import models
 from src.adapters import repository
