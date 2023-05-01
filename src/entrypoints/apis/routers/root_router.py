@@ -72,7 +72,7 @@ async def get_user(
         status_code=200,
         media_type='application/json',
         content=json.dumps(
-        {'data': user.output})
+        {'data': user.output if user is not None else None})
     )
 
 

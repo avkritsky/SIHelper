@@ -43,6 +43,9 @@ class DBRepo:
 
         user = data.scalars().first()
 
+        if user is None:
+            return
+
         await self.session.refresh(user, attribute_names=[
             'transactions',
             'settings',

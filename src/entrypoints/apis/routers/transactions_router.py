@@ -26,7 +26,6 @@ async def get_user_transactions(
     """Delete user in DB"""
     async with repository.DBRepo(session=session) as repo:
         user = await repo.get_user(tg_id)
-        print(user.transactions[0].__dict__)
 
     return Response(
         status_code=200,

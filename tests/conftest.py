@@ -34,19 +34,20 @@ def session_test():
 def create_db():
     async def wrap(session):
         async with session:
-            drop_expression = DropTable(
-                models.User.__table__,
-                if_exists=True
-            )
+            for db in models.all_tables:
+                drop_expression = DropTable(
+                    db.__table__,
+                    if_exists=True
+                )
 
-            create_expression = CreateTable(
-                models.User.__table__,
-                if_not_exists=True
-            )
+                create_expression = CreateTable(
+                    db.__table__,
+                    if_not_exists=True
+                )
 
-            await session.execute(drop_expression)
-            await session.execute(create_expression)
-            await session.commit()
+                await session.execute(drop_expression)
+                await session.execute(create_expression)
+                await session.commit()
     return wrap
 
 

@@ -26,6 +26,8 @@ class Base(MappedAsDataclass, DeclarativeBase):
                     output[key] = val
                 case datetime():
                     output[key] = val.isoformat()
+                case _:
+                    continue
 
         return output
 
