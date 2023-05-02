@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  redis:
+    container_name: 'kav_redis'
+    image: redis:latest
+    volumes:
+      - /home/kav/:/var/lib/redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"

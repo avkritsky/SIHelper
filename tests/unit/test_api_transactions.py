@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from src.domain.models import User, Transaction, ValidateTransaction
+from src.domain.models import User
 
 
 @pytest.mark.asyncio
