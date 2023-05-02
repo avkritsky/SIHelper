@@ -1,7 +1,7 @@
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.domain.models import User, Base
+from src.domain.models import User, Base, Transaction
 
 class DBRepo:
 
@@ -63,3 +63,10 @@ class DBRepo:
             res.append(item[0].output)
 
         return res
+
+    async def del_transaction(self, trans_id: str):
+        await self.session.execute(
+            delete(Transaction).where(
+                Transaction.id == int(trans_id)
+            )
+        )

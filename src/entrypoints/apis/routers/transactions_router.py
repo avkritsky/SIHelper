@@ -35,6 +35,27 @@ async def get_user_transactions(
     )
 
 
+@router.delete('/')
+async def delete_user_transactions(
+        trans_id: str,
+        session: Annotated[
+            AsyncSession,
+            Depends(get_session)
+        ],
+) -> Response:
+    """Delete user in DB"""
+    async with repository.DBRepo(session=session) as repo:
+        await repo.del_transaction(trans_id)
+        await repo.session.commit()
+
+    return Response(
+        status_code=200,
+        media_type='application/json',
+        content=json.dumps(
+        {'data': f'Delete transaction #{trans_id}'})
+    )
+
+
 @router.post('/')
 async def add_transaction(
         transaction: models.ValidateTransaction,

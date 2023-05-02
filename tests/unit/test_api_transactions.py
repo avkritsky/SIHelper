@@ -36,6 +36,11 @@ async def test_get_transaction(client_test, create_db):
             if key in item:
                 assert transaction[key] == item[key]
 
+    data = client.delete('/transaction/?trans_id=1')
+
+    assert data.status_code == 200
+    assert data.json().get('data') == 'Delete transaction #1'
+
     await session.close()
 
 
