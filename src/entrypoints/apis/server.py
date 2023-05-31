@@ -65,12 +65,20 @@ locker = Lock()
 #     return res
 
 
+async def start_load_currencies_data(locker: asyncio.Lock):
+    print('update redis data')
+    await services.load_currency_to_redis()
+    locker.release()
+
+
+
 @app.middleware('http')
 async def update_redis_data(
         request: Request,
         call_next,
+        back_task: BackgroundTasks,
 ):
-    if config.user is None:
+    if config.user is None or request.method not in {'GET', 'POST'}:
         print('тестовое окружение')
         return await call_next(request)
 
@@ -80,15 +88,11 @@ async def update_redis_data(
         item = await r.repo.get('BTC')
 
         if item is None or await r.repo.ttl('BTC') < 300:
-            if locker.locked():
-                await asyncio.sleep(2)
+            while locker.locked():
+                await asyncio.sleep(0.1)
             else:
                 await locker.acquire()
-                print('update redis data')
-
-                await services.load_currency_to_redis()
-
-                locker.release()
+                back_task.add_task(start_load_currencies_data, locker)
 
     return await call_next(request)
 
