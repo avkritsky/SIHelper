@@ -2,8 +2,9 @@ import asyncio
 import os
 from typing import Annotated
 from asyncio import Lock
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, Depends, Header
+from fastapi import FastAPI, Request, Depends, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +17,28 @@ from src.domain import models
 from config import config
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan():
+    if config.user is None:
+        print('тестовое окружение')
+        yield
+        return
+
+    session = get_session()
+
+    async with session:
+        for table in models.all_tables:
+            create_expression = CreateTable(
+                table.__table__,
+                if_not_exists=True
+            )
+
+            await session.execute(create_expression)
+            await session.commit()
+        yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -32,25 +54,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event('startup')
-async def on_start():
-    if config.user is None:
-        print('тестовое окружение')
-        return
-
-    session = get_session()
-
-    async with session:
-        for table in models.all_tables:
-            create_expression = CreateTable(
-                table.__table__,
-                if_not_exists=True
-            )
-
-            await session.execute(create_expression)
-            await session.commit()
 
 
 locker = Lock()
