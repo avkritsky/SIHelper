@@ -25,22 +25,32 @@ def get_session() -> AsyncSession:
     return session_maker()
 
 
-async def get_redis():
-    return await redis.Redis()
+class DefaultRedis:
+    _instance = None
+
+    @property
+    async def session(self):
+        if self.__class__._instance is None:
+            try:
+                self.__class__._instance = await redis.Redis()
+            except Exception as e:
+                print(f'Error connect to redis: {e}')
+        return self.__class__._instance
 
 
 class RedisUow:
-    def __init__(self, session_maker=get_redis):
+    def __init__(self, session_maker=DefaultRedis()):
         self.session_maker = session_maker
         self.repo: repository.RedisRepo | None = None
 
     async def __aenter__(self):
-        connect = await self.session_maker()
+        connect = await self.session_maker.session
         self.repo = repository.RedisRepo(connect)
         return self
 
     async def __aexit__(self, *args):
-        await self.repo.connect.close()
+        self.repo = None
+        # await self.repo.connect.close()
 
 
 def get_redis_uow():

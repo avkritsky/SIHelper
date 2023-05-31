@@ -14,7 +14,8 @@ from pydantic import BaseModel
 
 class Base(MappedAsDataclass, DeclarativeBase):
     @property
-    def output(self):
+    def output(self) -> dict:
+        """Return attributes of examples of class"""
         output = {}
 
         for key, val in self.__dict__.items():

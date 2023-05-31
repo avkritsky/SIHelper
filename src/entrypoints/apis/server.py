@@ -4,21 +4,25 @@ from typing import Annotated
 from asyncio import Lock
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, Depends, Header, BackgroundTasks
+from fastapi import FastAPI, Depends, Header, BackgroundTasks, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.schema import CreateTable
 
 from src.service_layer.unit_of_work import get_session, get_redis_uow
-from src.entrypoints.apis.routers import root_router, transactions_router
+from src.entrypoints.apis.routers import (
+    root_router,
+    transactions_router,
+    statistic_router,
+)
 from src.service_layer import services
 from src.domain import models
 from config import config
 
 
 @asynccontextmanager
-async def lifespan():
+async def lifespan(app: FastAPI):
     if config.user is None:
         print('тестовое окружение')
         yield
@@ -38,7 +42,12 @@ async def lifespan():
         yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title='SIHe 3',
+    description='PET PROJECT by AVKRITSKY',
+    version='0.1.2023.05.31',
+    lifespan=lifespan,
+)
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -59,43 +68,15 @@ app.add_middleware(
 locker = Lock()
 
 
-# @app.get('/')
-# async def exe_pep():
-#     res = await services.load_currency_to_redis()
-#     return res
-
-
-async def start_load_currencies_data(locker: asyncio.Lock):
-    print('update redis data')
-    await services.load_currency_to_redis()
-    locker.release()
-
-
-
-@app.middleware('http')
-async def update_redis_data(
-        request: Request,
-        call_next,
-        back_task: BackgroundTasks,
-):
-    if config.user is None or request.method not in {'GET', 'POST'}:
-        print('тестовое окружение')
-        return await call_next(request)
-
-    redis = get_redis_uow()
-
-    async with redis as r:
-        item = await r.repo.get('BTC')
-
-        if item is None or await r.repo.ttl('BTC') < 300:
-            while locker.locked():
-                await asyncio.sleep(0.1)
-            else:
-                await locker.acquire()
-                back_task.add_task(start_load_currencies_data, locker)
-
-    return await call_next(request)
+@app.get('/update_redis_data')
+async def update_redis_data():
+    try:
+        await services.load_currency_to_redis()
+    except Exception as e:
+        return Response(status_code=503, content=str(e))
+    return Response(status_code=200)
 
 
 app.include_router(root_router.router)
 app.include_router(transactions_router.router)
+app.include_router(statistic_router.router)
