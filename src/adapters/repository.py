@@ -111,14 +111,25 @@ class HTTPRepo:
 
 
 class RedisRepo:
+    connect: redis.Redis = None
+
     def __init__(self, connect: redis.Redis):
-        self.connect = connect
+        self.connect: redis.Redis = connect
 
     async def get(self, key: str) -> Any:
         item = await self.connect.get(key)
         if item is None:
             return
         return pickle.loads(item)
+
+    async def list(self) -> dict[str, Any]:
+        keys = await self.connect.keys('*')
+        data = {}
+        for key in keys:
+            if isinstance(key, bytes):
+                key = key.decode()
+            data[key] = await self.get(key)
+        return data
 
     async def set(self, key: str, item: Any, ttl_sec: int | None = None):
         await self.connect.set(
@@ -136,42 +147,43 @@ class RedisRepo:
 
 
 async def main(repo: HTTPRepo):
-    # repo = RedisRepo(await redis.Redis())  # "redis://localhost",  db=1))
+    repo = RedisRepo(await redis.Redis())  # "redis://localhost",  db=1))
     #
-    # await repo.set('rest', {}, 60)
+    for i in range(5):
+        await repo.set(f'rest:{i}', {'test': '[p]'}, 60)
     #
     # await asyncio.sleep(1)
     #
-    # print(await repo.get('rest'))
+    print(await repo.list())
     # print(await repo.ttl('rest'))
     #
     # await repo.delete('rest')
     # print(await repo.get('rest'))
     #
-    # await repo.connect.close()
+    await repo.connect.close()
 
-    import os
-    key = os.environ.get('CURRENCY_API_KEY')
-    key2 = os.environ.get('CRYPTO_API_KEY')
-
-    print(key, type(key))
-    url = ("https://"
-           "api.freecurrencyapi.com/v1/latest"
-           "?apikey=")
+    # import os
+    # key = os.environ.get('CURRENCY_API_KEY')
+    # key2 = os.environ.get('CRYPTO_API_KEY')
+    #
+    # print(key, type(key))
+    # url = ("https://"
+    #        "api.freecurrencyapi.com/v1/latest"
+    #        "?apikey=")
     # url += key
-    url += '&currencies=EUR%2CAUD%2CRUB'
+    # url += '&currencies=EUR%2CAUD%2CRUB'
 
     #http://api.freecurrencyapi.com/v1/latest?apikey=&currencies=AUD%2CEUR%2CRUB
 
     #
-    url2 = ("https://pro-api.coinmarketcap.com"
-            "/v1/cryptocurrency/listings/latest"
-            "?cryptocurrency_type=all"
-            "&convert=USD"
-            f"&CMC_PRO_API_KEY={key2}")
+    # url2 = ("https://pro-api.coinmarketcap.com"
+    #         "/v1/cryptocurrency/listings/latest"
+    #         "?cryptocurrency_type=all"
+    #         "&convert=USD"
+    #         f"&CMC_PRO_API_KEY={key2}")
 
-    print(url)
-    print(url2)
+    # print(url)
+    # print(url2)
     #
     # async with repo as r:
     #     code, data = await r.get(url)
