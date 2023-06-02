@@ -3,6 +3,7 @@ import json
 import pprint
 import pickle
 from typing import Any
+from abc import ABC
 
 import httpx
 import redis.asyncio as redis
@@ -12,7 +13,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.domain.models import User, Base, Transaction
 
 
-class DBRepo:
+class AbstractRepo(ABC):
+    pass
+
+
+class DBRepo(AbstractRepo):
 
     def __init__(
             self,
@@ -81,7 +86,7 @@ class DBRepo:
         )
 
 
-class HTTPRepo:
+class HTTPRepo(AbstractRepo):
 
     def __init__(self):
         self.client: httpx.AsyncClient | None = None
@@ -110,7 +115,7 @@ class HTTPRepo:
         return r.status_code, r.json()
 
 
-class RedisRepo:
+class RedisRepo(AbstractRepo):
     connect: redis.Redis = None
 
     def __init__(self, connect: redis.Redis):
@@ -144,6 +149,37 @@ class RedisRepo:
 
     async def delete(self, key: str) -> None:
         await self.connect.delete(key)
+
+
+class FakeRepo(AbstractRepo):
+
+    def __init__(self, items=None):
+        if items is None:
+            items = []
+        self.items = items
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    async def get(self, *args, **kwargs):
+        return self.items.pop(0)
+
+    async def list(self, *args, **kwargs):
+        return self.items.pop(0)
+
+    async def set(self, *args, **kwargs):
+        self.items.append(
+            (*args, kwargs)
+        )
+
+    async def ttl(self, *args, **kwargs):
+        return args[0]
+
+    async def delete(self, *args, **kwargs):
+        return
 
 
 async def main(repo: HTTPRepo):
@@ -209,7 +245,6 @@ async def main(repo: HTTPRepo):
     #                              'price': 27696.612953640695,
     #                              ...}},
     #            'symbol': 'BTC',},
-
 
 
 if __name__ == '__main__':

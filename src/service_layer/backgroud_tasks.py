@@ -4,7 +4,7 @@ from src.adapters import repository
 
 async def update_currencies_data(
         redis_uow: unit_of_work.RedisUow,
-        http_repo: repository.HTTPRepo,
+        http_repo: repository.AbstractRepo,
 ):
     print('update redis data')
     try:

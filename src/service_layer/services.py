@@ -10,7 +10,7 @@ from config import config
 
 async def load_currency_to_redis(
         redis_uow: unit_of_work.RedisUow = unit_of_work.RedisUow(),
-        http_repo: repository.HTTPRepo = repository.HTTPRepo(),
+        http_repo: repository.AbstractRepo = repository.HTTPRepo(),
 ):
     """Get currencies data from API and write to redis"""
     print('Проверка необходимости обновления данных')
@@ -49,11 +49,11 @@ async def write_data_to_redis(data: dict, redis_uow: unit_of_work.RedisUow):
 
 
 async def get_currencies_data(
-        http_repo: repository.HTTPRepo
+        http_repo: repository.AbstractRepo
 ) -> Dict[str, dict]:
     async with http_repo as r:
         url = config.url_currency.format(
-            config.CURRENCY_API_KEY.replace('\r', '')
+            str(config.CURRENCY_API_KEY).replace('\r', '')
         )
         code, data = await r.get(url)
 

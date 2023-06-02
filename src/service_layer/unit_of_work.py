@@ -53,6 +53,17 @@ class RedisUow:
         # await self.repo.connect.close()
 
 
+class FakeUoW(RedisUow):
+    def __init__(self, repo):
+        self.repo = repo
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
 def get_redis_uow():
     return RedisUow()
 
