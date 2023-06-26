@@ -101,7 +101,13 @@ class HTTPRepo(AbstractRepo):
     async def get(self, url: str) -> tuple[int, str | dict]:
         """Вернёт status code и python-объект ответа"""
         r: httpx.Response = await self.client.get(url)
-        return r.status_code, r.json()
+
+        try:
+            return r.status_code, json.loads(r.content)
+        except json.JSONDecodeError:
+            return 503, 'JSONDecode error'
+        except Exception as e:
+            return 500, f'Error: {e}'
 
     async def post(
             self,

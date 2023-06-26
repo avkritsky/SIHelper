@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  sihe_api:
+    image: python:3.11.2-slim-bullseye
+    container_name: sihe_api
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - .:/var/www/html/
+    working_dir: /var/www/html
+    command: bash start.sh
+    network_mode: host
+  sihe_bot:
+    image: python:3.11.2-slim-bullseye
+    container_name: sihe_bot
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - .:/var/www/html/
+    working_dir: /var/www/html
+    command: bash start_bot.sh
+    network_mode: host

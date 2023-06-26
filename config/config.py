@@ -19,7 +19,10 @@ url_crypto = ("https://pro-api.coinmarketcap.com"
               "&convert=USD"
               "&CMC_PRO_API_KEY={}")
 
+TG_API_KEY = os.environ.get('TG_API_KEY')
 CURRENCY_API_KEY = os.environ.get('CURRENCY_API_KEY')
 CRYPTO_API_KEY = os.environ.get('CRYPTO_API_KEY')
+
+API_USER_STAT_ROUTE = 'http://5.188.31.162:8031/statistic/?tg_id='
 
 TTL_FOR_CURR_DATA = 2 * 60 * 60

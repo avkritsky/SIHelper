@@ -16,7 +16,7 @@ from src.entrypoints.apis.routers import (
     transactions_router,
     statistic_router,
 )
-from src.service_layer import services
+from src.service_layer import services, backgroud_tasks
 from src.domain import models
 from config import config
 
@@ -29,6 +29,10 @@ async def lifespan(app: FastAPI):
         return
 
     session = get_session()
+    try:
+        await services.load_currency_to_redis()
+    except Exception as e:
+       print(f'Ошибка обновления данных в редисе: {e}')
 
     async with session:
         for table in models.all_tables:
@@ -58,7 +62,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

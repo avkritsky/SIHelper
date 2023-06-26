@@ -27,6 +27,9 @@ async def get_user_transactions(
     async with repository.DBRepo(session=session) as repo:
         user = await repo.get_user(tg_id)
 
+    if user is None:
+        return Response(status_code=404, content='User not found!')
+
     return Response(
         status_code=200,
         media_type='application/json',

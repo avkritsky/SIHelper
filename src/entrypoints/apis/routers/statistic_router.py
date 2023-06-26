@@ -40,6 +40,7 @@ async def get_user_stat(
         http_repo
     )
 
+
     print('получение данных из бд')
     async with repository.DBRepo(session=session) as repo:
         user = await repo.get_user(tg_id)
@@ -47,7 +48,8 @@ async def get_user_stat(
     print('получение данных из редиса')
     async with redis_uow:
         while not (currencies_data := await redis_uow.repo.list()):
-            await asyncio.sleep(0.1)
+            print('hehe')
+            await asyncio.sleep(1)
 
 
     data = await services.calculate_user_statistic(
