@@ -29,10 +29,6 @@ async def lifespan(app: FastAPI):
         return
 
     session = get_session()
-    try:
-        await services.load_currency_to_redis()
-    except Exception as e:
-       print(f'Ошибка обновления данных в редисе: {e}')
 
     async with session:
         for table in models.all_tables:

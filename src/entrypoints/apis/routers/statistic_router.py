@@ -34,10 +34,14 @@ async def get_user_stat(
     """Delete user in DB"""
 
     print('запуск фоновой задачи')
-    back_tasks.add_task(
-        backgroud_tasks.update_currencies_data,
+    # back_tasks.add_task(
+    #     backgroud_tasks.update_currencies_data,
+    #     redis_uow,
+    #     http_repo
+    # )
+    await backgroud_tasks.update_currencies_data(
         redis_uow,
-        http_repo
+        http_repo,
     )
 
 
